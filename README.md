@@ -24,9 +24,8 @@ Download a binary from the [replease page](https://github.com/suzuki-shunsuke/tf
 ## How to use
 
 ```
-$ terraform show -json > state.json
 $ vi tfmigrator.yaml
-$ cat *.tf | tfmigrator run [-skip-state] state.json
+$ cat *.tf | tfmigrator run [-skip-state]
 ```
 
 ## Configuration file
