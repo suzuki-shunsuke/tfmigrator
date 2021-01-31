@@ -9,11 +9,12 @@ CLI tool to migrate Terraform configuration and State
 
 ## Overview
 
-`tfmigrator` is a CLI tool to migrate Terraform configuration and State.
+`tfmigrator` is a CLI tool to migrate Terraform configuration and State into multiple states.
+`tfmigrator` configures rules to classify resources and migrate resources to other states via `terraform state mv` and [hcledit](https://github.com/minamijoyo/hcledit).
 
 ## Requirement
 
-* Terraform
+* Terraform CLI
 * [hcledit](https://github.com/minamijoyo/hcledit)
 
 ## Install
@@ -50,6 +51,11 @@ items:
   resource_name: "{{.Values.name}}"
   tf_path: bar/resource.tf
 ```
+
+## Restriction
+
+tfmigrator migrates Terraform configuration with hcledit and doesn't support to expand the expression.
+For example, if Terraform configuration refers local values, the migrated configuration may be broken.
 
 ## LICENSE
 
