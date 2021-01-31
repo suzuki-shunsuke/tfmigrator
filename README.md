@@ -7,6 +7,10 @@
 
 CLI tool to migrate Terraform configuration and State
 
+## Blog written in Japanese
+
+[terraformer で雑に生成した tf ファイル と state を分割したくてツールを書いた](https://techblog.szksh.cloud/tfmigrator/)
+
 ## Overview
 
 `tfmigrator` is a CLI tool to migrate Terraform configuration and State into multiple states.
