@@ -29,6 +29,11 @@ func (runner *Runner) Run(ctx context.Context, args ...string) error {
 						Name:  "log-level",
 						Usage: "log level",
 					},
+					&cli.StringFlag{
+						Name:    "config",
+						Aliases: []string{"c"},
+						Usage:   "configuration file path",
+					},
 					&cli.BoolFlag{
 						Name:  "skip-state",
 						Usage: "skip to terraform state mv",
