@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
 type ResourcePathComputer struct {
@@ -30,6 +31,10 @@ func (crpc *CompiledResourcePathComputer) Parse(rsc interface{}) (string, error)
 	buf := &bytes.Buffer{}
 	if err := crpc.tmpl.Execute(buf, rsc); err != nil {
 		return "", fmt.Errorf("render a template with params: %w", err)
+	}
+	p := buf.String()
+	if !hclsyntax.ValidIdentifier(p) {
+		return "", fmt.Errorf("invalid resource path: " + p)
 	}
 	return buf.String(), nil
 }
