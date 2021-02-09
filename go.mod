@@ -3,7 +3,7 @@ module github.com/suzuki-shunsuke/tfmigrator
 go 1.15
 
 require (
-	github.com/Masterminds/sprig/v3 v3.2.0
+	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/Songmu/timeout v0.4.0
 	github.com/antonmedv/expr v1.8.9
 	github.com/google/uuid v1.2.0 // indirect
