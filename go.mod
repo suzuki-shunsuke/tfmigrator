@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.9.0
 	github.com/huandu/xstrings v1.3.2 // indirect
-	github.com/sirupsen/logrus v1.8.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	gopkg.in/yaml.v2 v2.4.0
