@@ -7,7 +7,7 @@ require (
 	github.com/Songmu/timeout v0.4.0
 	github.com/antonmedv/expr v1.8.9
 	github.com/google/uuid v1.2.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.9.1
+	github.com/hashicorp/hcl/v2 v2.10.0
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
