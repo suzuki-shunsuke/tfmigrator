@@ -9,8 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-type ResourcePathComputer struct {
-}
+type ResourcePathComputer struct{}
 
 type CompiledResourcePathComputer struct {
 	tmpl *template.Template
