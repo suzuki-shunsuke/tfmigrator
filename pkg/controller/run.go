@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func (ctrl *Controller) Run(ctx context.Context, param Param) error {
+func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:cyclop
 	cfg := Config{}
 	if err := ctrl.readConfig(param, &cfg); err != nil {
 		return err
@@ -19,7 +19,7 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error {
 	state := State{}
 	if param.StatePath != "" {
 		if err := ctrl.readState(param.StatePath, &state); err != nil {
-			return err
+			return fmt.Errorf("read state (state path: %s): %w", param.StatePath, err)
 		}
 	} else {
 		if err := ctrl.readStateFromCmd(ctx, &state); err != nil {
@@ -104,12 +104,11 @@ func (rp *ResourcePath) Path() string {
 	return rp.Type + "." + rp.Name
 }
 
-func (ctrl *Controller) handleResource(
-	ctx context.Context, param Param, rsc Resource, hclFilePath string) error {
+func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Resource, hclFilePath string) error {
 	for _, item := range param.Items {
 		f, err := ctrl.handleItem(ctx, rsc, item, hclFilePath, param.SkipState)
 		if err != nil {
-			return err
+			return fmt.Errorf("handle item (rule: %s): %w", item.Rule, err)
 		}
 		if f {
 			break
@@ -118,8 +117,7 @@ func (ctrl *Controller) handleResource(
 	return nil
 }
 
-func (ctrl *Controller) handleItem(
-	ctx context.Context, rsc Resource, item Item, hclFilePath string, skipState bool) (bool, error) {
+func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item, hclFilePath string, skipState bool) (bool, error) { //nolint:cyclop
 	// filter resource by condition
 	matched, err := item.CompiledRule.Match(rsc)
 	if err != nil {
@@ -142,7 +140,7 @@ func (ctrl *Controller) handleItem(
 		// compute new resource path
 		newResourcePath.Name, err = item.CompiledResourceName.Parse(rsc)
 		if err != nil {
-			return true, err
+			return true, fmt.Errorf("compute a new resource name (template: %s): %w", item.ResourceName, err)
 		}
 	}
 	hclFile, err := os.Open(hclFilePath)
@@ -151,7 +149,7 @@ func (ctrl *Controller) handleItem(
 	}
 	defer hclFile.Close()
 
-	tfFile, err := os.OpenFile(item.TFPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	tfFile, err := os.OpenFile(item.TFPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", item.TFPath, err)
 	}
@@ -179,11 +177,11 @@ func (ctrl *Controller) getHCL(
 	}
 	pp := bytes.Buffer{}
 	if err := ctrl.blockGet(ctx, "resource."+resourcePath, hclFile, &pp); err != nil {
-		return err
+		return fmt.Errorf("get a resource from HCL file: %w", err)
 	}
 
 	if err := ctrl.blockMv(ctx, "resource."+resourcePath, "resource."+newResourcePath, &pp, buf); err != nil {
-		return err
+		return fmt.Errorf("rename resource: %w", err)
 	}
 	return nil
 }
