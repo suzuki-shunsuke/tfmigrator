@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/suzuki-shunsuke/tfmigrator/workflows/test/badge.svg)](https://github.com/suzuki-shunsuke/tfmigrator/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/suzuki-shunsuke/tfmigrator)](https://goreportcard.com/report/github.com/suzuki-shunsuke/tfmigrator)
 [![GitHub last commit](https://img.shields.io/github/last-commit/suzuki-shunsuke/tfmigrator.svg)](https://github.com/suzuki-shunsuke/tfmigrator)
-[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/suzuki-shunsuke/tfmigrator/master/LICENSE)
+[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/suzuki-shunsuke/tfmigrator/main/LICENSE)
 
 CLI tool to migrate Terraform configuration and State
 
