@@ -185,7 +185,12 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		return true, fmt.Errorf("render a state_basename: %w", err)
 	}
 
-	if err := ctrl.stateMv(ctx, filepath.Join(item.StateDirname, stateBasename), resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
+	stateDirname, err := item.StateDirname.Execute(rsc)
+	if err != nil {
+		return true, fmt.Errorf("render a state_dirname: %w", err)
+	}
+
+	if err := ctrl.stateMv(ctx, filepath.Join(stateDirname, stateBasename), resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
 		return true, err
 	}
 	// write hcl

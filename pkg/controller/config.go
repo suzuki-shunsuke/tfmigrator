@@ -16,7 +16,7 @@ type Config struct {
 type Item struct {
 	Rule          *expr.Bool
 	Exclude       bool
-	StateDirname  string         `yaml:"state_dirname"`
+	StateDirname  *text.Template `yaml:"state_dirname"`
 	StateBasename *text.Template `yaml:"state_basename"`
 	ResourceName  *ResourceName  `yaml:"resource_name"`
 	TFDirname     string         `yaml:"tf_dirname"`
@@ -62,7 +62,7 @@ type MigratedResource struct {
 	DestResourcePath   string         `yaml:"dest_resource_path"`
 	TFDirname          string         `yaml:"tf_dirname"`
 	TFBasename         string         `yaml:"tf_basename"`
-	StateDirname       string         `yaml:"state_dirname"`
+	StateDirname       *text.Template `yaml:"state_dirname"`
 	StateBasename      *text.Template `yaml:"state_basename"`
 }
 
