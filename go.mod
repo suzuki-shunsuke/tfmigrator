@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.0
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/suzuki-shunsuke/go-template-unmarshaler v0.1.0 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	gopkg.in/yaml.v2 v2.4.0

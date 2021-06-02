@@ -4,8 +4,11 @@ import (
 	"context"
 	"io"
 	"os"
+	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/go-template-unmarshaler/text"
 )
 
 type Controller struct { //nolint:maligned
@@ -24,6 +27,10 @@ func New(ctx context.Context, param Param) (Controller, Param, error) {
 		}
 		logrus.SetLevel(lvl)
 	}
+
+	text.SetTemplateFunc(func(s string) (*template.Template, error) {
+		return template.New("_").Funcs(sprig.TxtFuncMap()).Parse(s) //nolint:wrapcheck
+	})
 
 	return Controller{
 		Stdin:  os.Stdin,

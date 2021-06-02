@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/suzuki-shunsuke/go-template-unmarshaler/text"
 	"github.com/suzuki-shunsuke/tfmigrator/pkg/expr"
 	"gopkg.in/yaml.v2"
 )
@@ -15,11 +16,11 @@ type Config struct {
 type Item struct {
 	Rule          *expr.Bool
 	Exclude       bool
-	StateDirname  string        `yaml:"state_dirname"`
-	StateBasename string        `yaml:"state_basename"`
-	ResourceName  *ResourceName `yaml:"resource_name"`
-	TFDirname     string        `yaml:"tf_dirname"`
-	TFBasename    string        `yaml:"tf_basename"`
+	StateDirname  string         `yaml:"state_dirname"`
+	StateBasename *text.Template `yaml:"state_basename"`
+	ResourceName  *ResourceName  `yaml:"resource_name"`
+	TFDirname     string         `yaml:"tf_dirname"`
+	TFBasename    string         `yaml:"tf_basename"`
 }
 
 type Param struct {
@@ -57,12 +58,12 @@ type DryRunResult struct {
 }
 
 type MigratedResource struct {
-	SourceResourcePath string `yaml:"source_resource_path"`
-	DestResourcePath   string `yaml:"dest_resource_path"`
-	TFDirname          string `yaml:"tf_dirname"`
-	TFBasename         string `yaml:"tf_basename"`
-	StateDirname       string `yaml:"state_dirname"`
-	StateBasename      string `yaml:"state_basename"`
+	SourceResourcePath string         `yaml:"source_resource_path"`
+	DestResourcePath   string         `yaml:"dest_resource_path"`
+	TFDirname          string         `yaml:"tf_dirname"`
+	TFBasename         string         `yaml:"tf_basename"`
+	StateDirname       string         `yaml:"state_dirname"`
+	StateBasename      *text.Template `yaml:"state_basename"`
 }
 
 func (ctrl *Controller) readConfig(param Param, cfg *Config) error {
