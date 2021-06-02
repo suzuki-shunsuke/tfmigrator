@@ -154,7 +154,6 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, MigratedResource{
 			SourceResourcePath: resourcePath.Path(),
 			DestResourcePath:   newResourcePath.Path(),
-			TFDirname:          item.TFDirname,
 			TFBasename:         item.TFBasename,
 			StateDirname:       item.StateDirname,
 			StateBasename:      item.StateBasename,
@@ -168,7 +167,17 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	}
 	defer hclFile.Close()
 
-	tfPath := filepath.Join(item.TFDirname, item.TFBasename)
+	stateBasename, err := item.StateBasename.Execute(rsc)
+	if err != nil {
+		return true, fmt.Errorf("render a state_basename: %w", err)
+	}
+
+	stateDirname, err := item.StateDirname.Execute(rsc)
+	if err != nil {
+		return true, fmt.Errorf("render a state_dirname: %w", err)
+	}
+
+	tfPath := filepath.Join(stateDirname, item.TFBasename)
 	tfFile, err := os.OpenFile(tfPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", tfPath, err)
@@ -178,16 +187,6 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	buf := bytes.Buffer{}
 	if err := ctrl.getHCL(ctx, resourcePath.Path(), newResourcePath.Path(), hclFile, &buf); err != nil {
 		return true, err
-	}
-
-	stateBasename, err := item.StateBasename.Execute(rsc)
-	if err != nil {
-		return true, fmt.Errorf("render a state_basename: %w", err)
-	}
-
-	stateDirname, err := item.StateDirname.Execute(rsc)
-	if err != nil {
-		return true, fmt.Errorf("render a state_dirname: %w", err)
 	}
 
 	if err := ctrl.stateMv(ctx, filepath.Join(stateDirname, stateBasename), resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
