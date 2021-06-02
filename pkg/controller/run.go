@@ -154,7 +154,8 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, MigratedResource{
 			SourceResourcePath: resourcePath.Path(),
 			DestResourcePath:   newResourcePath.Path(),
-			TFPath:             item.TFPath,
+			TFDirname:          item.TFDirname,
+			TFBasename:         item.TFBasename,
 			StateDirname:       item.StateDirname,
 			StateBasename:      item.StateBasename,
 		})
@@ -167,9 +168,10 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	}
 	defer hclFile.Close()
 
-	tfFile, err := os.OpenFile(item.TFPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	tfPath := filepath.Join(item.TFDirname, item.TFBasename)
+	tfFile, err := os.OpenFile(tfPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", item.TFPath, err)
+		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", tfPath, err)
 	}
 	defer tfFile.Close()
 
@@ -183,7 +185,7 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	}
 	// write hcl
 	if _, err := io.Copy(tfFile, &buf); err != nil {
-		return true, fmt.Errorf("write Terraform configuration to a file %s: %w", item.TFPath, err)
+		return true, fmt.Errorf("write Terraform configuration to a file %s: %w", tfPath, err)
 	}
 	return true, nil
 }
