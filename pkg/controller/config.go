@@ -13,11 +13,12 @@ type Config struct {
 }
 
 type Item struct {
-	Rule         *expr.Bool
-	Exclude      bool
-	StateOut     string        `yaml:"state_out"`
-	ResourceName *ResourceName `yaml:"resource_name"`
-	TFPath       string        `yaml:"tf_path"`
+	Rule          *expr.Bool
+	Exclude       bool
+	StateDirname  string        `yaml:"state_dirname"`
+	StateBasename string        `yaml:"state_basename"`
+	ResourceName  *ResourceName `yaml:"resource_name"`
+	TFPath        string        `yaml:"tf_path"`
 }
 
 type Param struct {
@@ -58,7 +59,8 @@ type MigratedResource struct {
 	SourceResourcePath string `yaml:"source_resource_path"`
 	DestResourcePath   string `yaml:"dest_resource_path"`
 	TFPath             string `yaml:"tf_path"`
-	StateOut           string `yaml:"state_out"`
+	StateDirname       string `yaml:"state_dirname"`
+	StateBasename      string `yaml:"state_basename"`
 }
 
 func (ctrl *Controller) readConfig(param Param, cfg *Config) error {

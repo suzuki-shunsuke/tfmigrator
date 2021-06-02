@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
@@ -154,7 +155,8 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 			SourceResourcePath: resourcePath.Path(),
 			DestResourcePath:   newResourcePath.Path(),
 			TFPath:             item.TFPath,
-			StateOut:           item.StateOut,
+			StateDirname:       item.StateDirname,
+			StateBasename:      item.StateBasename,
 		})
 		return true, nil
 	}
@@ -176,7 +178,7 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		return true, err
 	}
 
-	if err := ctrl.stateMv(ctx, item.StateOut, resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
+	if err := ctrl.stateMv(ctx, filepath.Join(item.StateDirname, item.StateBasename), resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
 		return true, err
 	}
 	// write hcl
