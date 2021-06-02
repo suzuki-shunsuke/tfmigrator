@@ -9,11 +9,9 @@ import (
 )
 
 type Controller struct { //nolint:maligned
-	ResourcePathComputer ResourcePathComputer
-	Stdin                io.Reader
-	Stdout               io.Writer
-	Stderr               io.Writer
-	Matcher              Matcher
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
 }
 
 func New(ctx context.Context, param Param) (Controller, Param, error) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/suzuki-shunsuke/tfmigrator/pkg/expr"
 	"gopkg.in/yaml.v2"
 )
 
@@ -12,13 +13,11 @@ type Config struct {
 }
 
 type Item struct {
-	Rule                 string
-	Exclude              bool
-	StateOut             string                       `yaml:"state_out"`
-	ResourceName         string                       `yaml:"resource_name"`
-	TFPath               string                       `yaml:"tf_path"`
-	CompiledRule         CompiledRule                 `yaml:"-"`
-	CompiledResourceName CompiledResourcePathComputer `yaml:"-"`
+	Rule         *expr.Bool
+	Exclude      bool
+	StateOut     string        `yaml:"state_out"`
+	ResourceName *ResourceName `yaml:"resource_name"`
+	TFPath       string        `yaml:"tf_path"`
 }
 
 type Param struct {

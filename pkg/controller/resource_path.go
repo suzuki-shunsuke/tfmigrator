@@ -9,26 +9,28 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-type ResourcePathComputer struct{}
-
-type CompiledResourcePathComputer struct {
+type ResourceName struct {
 	tmpl *template.Template
+	raw  string
 }
 
-func (rpc *ResourcePathComputer) Compile(src string) (CompiledResourcePathComputer, error) {
-	crpc := CompiledResourcePathComputer{}
-	tmpl, err := template.New("_").Funcs(sprig.TxtFuncMap()).Parse(src)
-	if err != nil {
-		return crpc, fmt.Errorf("parse a template: %w", err)
+func (resourceName *ResourceName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var a string
+	if err := unmarshal(&a); err != nil {
+		return err
 	}
-	crpc.tmpl = tmpl
-
-	return crpc, nil
+	t, err := template.New("_").Funcs(sprig.TxtFuncMap()).Parse(a)
+	if err != nil {
+		return fmt.Errorf("parse a string with text/template: %w", err)
+	}
+	resourceName.raw = a
+	resourceName.tmpl = t
+	return nil
 }
 
-func (crpc *CompiledResourcePathComputer) Parse(rsc interface{}) (string, error) {
+func (resourceName *ResourceName) Parse(rsc interface{}) (string, error) {
 	buf := &bytes.Buffer{}
-	if err := crpc.tmpl.Execute(buf, rsc); err != nil {
+	if err := resourceName.tmpl.Execute(buf, rsc); err != nil {
 		return "", fmt.Errorf("render a template with params: %w", err)
 	}
 	p := buf.String()
@@ -36,4 +38,8 @@ func (crpc *CompiledResourcePathComputer) Parse(rsc interface{}) (string, error)
 		return "", fmt.Errorf("invalid resource path: " + p)
 	}
 	return buf.String(), nil
+}
+
+func (resourceName *ResourceName) Raw() string {
+	return resourceName.raw
 }
