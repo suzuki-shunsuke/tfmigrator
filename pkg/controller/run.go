@@ -37,15 +37,6 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:c
 		return err
 	}
 
-	for i, item := range param.Items {
-		cr, err := ctrl.Matcher.Compile(item.Rule)
-		if err != nil {
-			return err
-		}
-		item.CompiledRule = cr
-		param.Items[i] = item
-	}
-
 	dryRunResult := DryRunResult{}
 
 	for _, rsc := range state.Values.RootModule.Resources {
@@ -111,7 +102,7 @@ func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Res
 	for _, item := range param.Items {
 		f, err := ctrl.handleItem(ctx, rsc, item, hclFilePath, param, dryRunResult)
 		if err != nil {
-			return fmt.Errorf("handle item (rule: %s): %w", item.Rule, err)
+			return fmt.Errorf("handle item (rule: %s): %w", item.Rule.Raw(), err)
 		}
 		if f {
 			matched = true
@@ -134,9 +125,9 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		return true, err
 	}
 	// filter resource by condition
-	matched, err := item.CompiledRule.Match(rsc)
+	matched, err := item.Rule.Run(rsc)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("check if the rule matches with the resource: %w", err)
 	}
 	if !matched {
 		return false, nil
