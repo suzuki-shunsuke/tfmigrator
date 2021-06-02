@@ -27,6 +27,7 @@ type Param struct {
 	StatePath      string
 	Items          []Item
 	SkipState      bool
+	DryRun         bool
 }
 
 type State struct {
@@ -46,6 +47,19 @@ type Resource struct {
 	Type    string                 `json:"type"`
 	Name    string                 `json:"name"`
 	Values  map[string]interface{} `json:"values"`
+}
+
+type DryRunResult struct {
+	MigratedResources []MigratedResource `yaml:"migrated_resources"`
+	ExcludedResources []string           `yaml:"excluded_resources"`
+	NoMatchResources  []string           `yaml:"no_match_resources"`
+}
+
+type MigratedResource struct {
+	SourceResourcePath string `yaml:"source_resource_path"`
+	DestResourcePath   string `yaml:"dest_resource_path"`
+	TFPath             string `yaml:"tf_path"`
+	StateOut           string `yaml:"state_out"`
 }
 
 func (ctrl *Controller) readConfig(param Param, cfg *Config) error {

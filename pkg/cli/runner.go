@@ -38,6 +38,10 @@ func (runner *Runner) Run(ctx context.Context, args ...string) error {
 						Name:  "skip-state",
 						Usage: "skip to terraform state mv",
 					},
+					&cli.BoolFlag{
+						Name:  "dry-run",
+						Usage: "dry run",
+					},
 					&cli.StringFlag{
 						Name:  "state",
 						Usage: "the output of 'terraform show -json'",

@@ -8,6 +8,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:cyclop
@@ -51,9 +53,16 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:c
 		param.Items[i] = item
 	}
 
+	dryRunResult := DryRunResult{}
+
 	for _, rsc := range state.Values.RootModule.Resources {
-		if err := ctrl.handleResource(ctx, param, rsc, tfPath); err != nil {
+		if err := ctrl.handleResource(ctx, param, rsc, tfPath, &dryRunResult); err != nil {
 			return err
+		}
+	}
+	if param.DryRun {
+		if err := yaml.NewEncoder(ctrl.Stdout).Encode(dryRunResult); err != nil {
+			return fmt.Errorf("encode dry run result as YAML: %w", err)
 		}
 	}
 	return nil
@@ -104,20 +113,33 @@ func (rp *ResourcePath) Path() string {
 	return rp.Type + "." + rp.Name
 }
 
-func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Resource, hclFilePath string) error {
+func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Resource, hclFilePath string, dryRunResult *DryRunResult) error {
+	matched := false
 	for _, item := range param.Items {
-		f, err := ctrl.handleItem(ctx, rsc, item, hclFilePath, param.SkipState)
+		f, err := ctrl.handleItem(ctx, rsc, item, hclFilePath, param, dryRunResult)
 		if err != nil {
 			return fmt.Errorf("handle item (rule: %s): %w", item.Rule, err)
 		}
 		if f {
+			matched = true
 			break
 		}
+	}
+	if !matched && param.DryRun {
+		resourcePath, err := getResourcePath(rsc)
+		if err != nil {
+			return err
+		}
+		dryRunResult.NoMatchResources = append(dryRunResult.NoMatchResources, resourcePath.Path())
 	}
 	return nil
 }
 
-func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item, hclFilePath string, skipState bool) (bool, error) { //nolint:cyclop
+func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item, hclFilePath string, param Param, dryRunResult *DryRunResult) (bool, error) { //nolint:cyclop,funlen
+	resourcePath, err := getResourcePath(rsc)
+	if err != nil {
+		return true, err
+	}
 	// filter resource by condition
 	matched, err := item.CompiledRule.Match(rsc)
 	if err != nil {
@@ -128,13 +150,12 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	}
 
 	if item.Exclude {
+		if param.DryRun {
+			dryRunResult.ExcludedResources = append(dryRunResult.ExcludedResources, resourcePath.Path())
+		}
 		return true, nil
 	}
 
-	resourcePath, err := getResourcePath(rsc)
-	if err != nil {
-		return true, err
-	}
 	newResourcePath := resourcePath
 	if item.ResourceName != "" {
 		// compute new resource path
@@ -143,6 +164,17 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 			return true, fmt.Errorf("compute a new resource name (template: %s): %w", item.ResourceName, err)
 		}
 	}
+
+	if param.DryRun {
+		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, MigratedResource{
+			SourceResourcePath: resourcePath.Path(),
+			DestResourcePath:   newResourcePath.Path(),
+			TFPath:             item.TFPath,
+			StateOut:           item.StateOut,
+		})
+		return true, nil
+	}
+
 	hclFile, err := os.Open(hclFilePath)
 	if err != nil {
 		return true, fmt.Errorf("open a Terraform configuration %s: %w", hclFilePath, err)
@@ -160,7 +192,7 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		return true, err
 	}
 
-	if err := ctrl.stateMv(ctx, item.StateOut, resourcePath.Path(), newResourcePath.Path(), skipState); err != nil {
+	if err := ctrl.stateMv(ctx, item.StateOut, resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
 		return true, err
 	}
 	// write hcl

@@ -13,6 +13,7 @@ func (runner *Runner) setCLIArg(c *cli.Context, param controller.Param) (control
 		param.LogLevel = logLevel
 	}
 	param.SkipState = c.Bool("skip-state")
+	param.DryRun = c.Bool("dry-run")
 	param.ConfigFilePath = c.String("config")
 	if param.ConfigFilePath == "" {
 		param.ConfigFilePath = "tfmigrator.yaml"
