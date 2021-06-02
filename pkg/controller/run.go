@@ -177,7 +177,12 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 		return true, fmt.Errorf("render a state_dirname: %w", err)
 	}
 
-	tfPath := filepath.Join(stateDirname, item.TFBasename)
+	tfBasename, err := item.TFBasename.Execute(rsc)
+	if err != nil {
+		return true, fmt.Errorf("render a tf_basename: %w", err)
+	}
+
+	tfPath := filepath.Join(stateDirname, tfBasename)
 	tfFile, err := os.OpenFile(tfPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", tfPath, err)

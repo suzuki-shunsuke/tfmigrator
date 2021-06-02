@@ -19,7 +19,7 @@ type Item struct {
 	StateDirname  *text.Template `yaml:"state_dirname"`
 	StateBasename *text.Template `yaml:"state_basename"`
 	ResourceName  *ResourceName  `yaml:"resource_name"`
-	TFBasename    string         `yaml:"tf_basename"`
+	TFBasename    *text.Template `yaml:"tf_basename"`
 }
 
 type Param struct {
@@ -59,7 +59,7 @@ type DryRunResult struct {
 type MigratedResource struct {
 	SourceResourcePath string         `yaml:"source_resource_path"`
 	DestResourcePath   string         `yaml:"dest_resource_path"`
-	TFBasename         string         `yaml:"tf_basename"`
+	TFBasename         *text.Template `yaml:"tf_basename"`
 	StateDirname       *text.Template `yaml:"state_dirname"`
 	StateBasename      *text.Template `yaml:"state_basename"`
 }
