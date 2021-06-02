@@ -43,13 +43,6 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:c
 			return err
 		}
 		item.CompiledRule = cr
-		if item.ResourceName != "" {
-			crpc, err := ctrl.ResourcePathComputer.Compile(item.ResourceName)
-			if err != nil {
-				return err
-			}
-			item.CompiledResourceName = crpc
-		}
 		param.Items[i] = item
 	}
 
@@ -157,11 +150,11 @@ func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item,
 	}
 
 	newResourcePath := resourcePath
-	if item.ResourceName != "" {
+	if item.ResourceName != nil {
 		// compute new resource path
-		newResourcePath.Name, err = item.CompiledResourceName.Parse(rsc)
+		newResourcePath.Name, err = item.ResourceName.Parse(rsc)
 		if err != nil {
-			return true, fmt.Errorf("compute a new resource name (template: %s): %w", item.ResourceName, err)
+			return true, fmt.Errorf("compute a new resource name (template: %s): %w", item.ResourceName.Raw(), err)
 		}
 	}
 

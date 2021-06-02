@@ -12,13 +12,12 @@ type Config struct {
 }
 
 type Item struct {
-	Rule                 string
-	Exclude              bool
-	StateOut             string                       `yaml:"state_out"`
-	ResourceName         string                       `yaml:"resource_name"`
-	TFPath               string                       `yaml:"tf_path"`
-	CompiledRule         CompiledRule                 `yaml:"-"`
-	CompiledResourceName CompiledResourcePathComputer `yaml:"-"`
+	Rule         string
+	Exclude      bool
+	StateOut     string        `yaml:"state_out"`
+	ResourceName *ResourceName `yaml:"resource_name"`
+	TFPath       string        `yaml:"tf_path"`
+	CompiledRule CompiledRule  `yaml:"-"`
 }
 
 type Param struct {
