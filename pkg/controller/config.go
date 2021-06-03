@@ -16,10 +16,53 @@ type Config struct {
 type Item struct {
 	Rule          *expr.Bool
 	Exclude       bool
+	Stop          bool
 	StateDirname  *text.Template `yaml:"state_dirname"`
 	StateBasename *text.Template `yaml:"state_basename"`
 	ResourceName  *ResourceName  `yaml:"resource_name"`
 	TFBasename    *text.Template `yaml:"tf_basename"`
+}
+
+type MatchedItem struct {
+	StateDirname  *text.Template
+	StateBasename *text.Template
+	ResourceName  *ResourceName
+	TFBasename    *text.Template
+	Exclude       bool
+}
+
+func (matchedItem *MatchedItem) Match() bool {
+	return matchedItem.Exclude ||
+		matchedItem.StateDirname != nil ||
+		matchedItem.ResourceName != nil ||
+		matchedItem.StateBasename != nil ||
+		matchedItem.TFBasename != nil
+}
+
+func (matchedItem *MatchedItem) Parse(rsc Resource) (*MigratedResource, error) {
+	resourceName, err := matchedItem.ResourceName.Parse(rsc)
+	if err != nil {
+		return nil, err
+	}
+	tfBasename, err := matchedItem.TFBasename.Execute(rsc)
+	if err != nil {
+		return nil, fmt.Errorf("render tf_basename: %w", err)
+	}
+	stateDirname, err := matchedItem.StateDirname.Execute(rsc)
+	if err != nil {
+		return nil, fmt.Errorf("render state_dirname: %w", err)
+	}
+	stateBasename, err := matchedItem.StateBasename.Execute(rsc)
+	if err != nil {
+		return nil, fmt.Errorf("render state_basename: %w", err)
+	}
+	return &MigratedResource{
+		SourceResourcePath: rsc.Address,
+		DestResourcePath:   rsc.Type + "." + resourceName,
+		TFBasename:         tfBasename,
+		StateDirname:       stateDirname,
+		StateBasename:      stateBasename,
+	}, nil
 }
 
 type Param struct {
@@ -57,11 +100,11 @@ type DryRunResult struct {
 }
 
 type MigratedResource struct {
-	SourceResourcePath string         `yaml:"source_resource_path"`
-	DestResourcePath   string         `yaml:"dest_resource_path"`
-	TFBasename         *text.Template `yaml:"tf_basename"`
-	StateDirname       *text.Template `yaml:"state_dirname"`
-	StateBasename      *text.Template `yaml:"state_basename"`
+	SourceResourcePath string `yaml:"source_resource_path"`
+	DestResourcePath   string `yaml:"dest_resource_path"`
+	TFBasename         string `yaml:"tf_basename"`
+	StateDirname       string `yaml:"state_dirname"`
+	StateBasename      string `yaml:"state_basename"`
 }
 
 func (ctrl *Controller) readConfig(param Param, cfg *Config) error {
