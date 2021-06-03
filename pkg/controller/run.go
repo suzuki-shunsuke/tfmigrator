@@ -42,7 +42,7 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:c
 
 	for _, rsc := range state.Values.RootModule.Resources {
 		if err := ctrl.handleResource(ctx, param, rsc, tfPath, &dryRunResult); err != nil {
-			return err
+			return fmt.Errorf("handle a resource %s: %w", rsc.Address, err)
 		}
 	}
 	if param.DryRun {
@@ -103,16 +103,17 @@ func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Res
 	if param.DryRun {
 		if matchedItem.Exclude {
 			dryRunResult.ExcludedResources = append(dryRunResult.ExcludedResources, rsc.Address)
-		}
-		if matchedItem.Match() {
-			migratedResource, err := matchedItem.Parse(rsc)
-			if err != nil {
-				return err
-			}
-			dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, *migratedResource)
 			return nil
 		}
-		dryRunResult.NoMatchResources = append(dryRunResult.NoMatchResources, rsc.Address)
+		if !matchedItem.Match() {
+			dryRunResult.NoMatchResources = append(dryRunResult.NoMatchResources, rsc.Address)
+			return nil
+		}
+		migratedResource, err := matchedItem.Parse(rsc)
+		if err != nil {
+			return err
+		}
+		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, *migratedResource)
 		return nil
 	}
 

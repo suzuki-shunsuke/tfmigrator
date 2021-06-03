@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -42,22 +43,40 @@ func (matchedItem *MatchedItem) Match() bool {
 }
 
 func (matchedItem *MatchedItem) Parse(rsc Resource) (*MigratedResource, error) {
-	resourceName, err := matchedItem.ResourceName.Parse(rsc)
-	if err != nil {
-		return nil, err
+	resourceName := rsc.Name
+	if !matchedItem.ResourceName.Empty() {
+		name, err := matchedItem.ResourceName.Parse(rsc)
+		if err != nil {
+			return nil, err
+		}
+		resourceName = name
+	}
+
+	if matchedItem.TFBasename.Empty() {
+		return nil, errors.New("tf_basename is required")
 	}
 	tfBasename, err := matchedItem.TFBasename.Execute(rsc)
 	if err != nil {
 		return nil, fmt.Errorf("render tf_basename: %w", err)
 	}
+
+	if matchedItem.StateDirname.Empty() {
+		return nil, errors.New("state_dirname is required")
+	}
 	stateDirname, err := matchedItem.StateDirname.Execute(rsc)
 	if err != nil {
 		return nil, fmt.Errorf("render state_dirname: %w", err)
 	}
-	stateBasename, err := matchedItem.StateBasename.Execute(rsc)
-	if err != nil {
-		return nil, fmt.Errorf("render state_basename: %w", err)
+
+	stateBasename := "terraform.tfstate"
+	if matchedItem.StateBasename != nil {
+		s, err := matchedItem.StateBasename.Execute(rsc)
+		if err != nil {
+			return nil, fmt.Errorf("render state_basename: %w", err)
+		}
+		stateBasename = s
 	}
+
 	return &MigratedResource{
 		SourceResourcePath: rsc.Address,
 		DestResourcePath:   rsc.Type + "." + resourceName,
