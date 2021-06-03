@@ -21,6 +21,7 @@ type Item struct {
 	StateBasename *text.Template `yaml:"state_basename"`
 	ResourceName  *ResourceName  `yaml:"resource_name"`
 	TFBasename    *text.Template `yaml:"tf_basename"`
+	Children      []Item
 }
 
 type MatchedItem struct {
@@ -29,6 +30,7 @@ type MatchedItem struct {
 	ResourceName  *ResourceName
 	TFBasename    *text.Template
 	Exclude       bool
+	Stop          bool
 }
 
 func (matchedItem *MatchedItem) Match() bool {

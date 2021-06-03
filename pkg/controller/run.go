@@ -95,7 +95,7 @@ func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Res
 		if err := ctrl.handleItem(rsc, item, &matchedItem); err != nil {
 			return fmt.Errorf("handle item (rule: %s): %w", item.Rule.Raw(), err)
 		}
-		if matchedItem.Exclude || item.Stop {
+		if matchedItem.Exclude || matchedItem.Stop {
 			break
 		}
 	}
@@ -157,7 +157,7 @@ func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Res
 	return nil
 }
 
-func (ctrl *Controller) handleItem(rsc Resource, item Item, matchedItem *MatchedItem) error {
+func (ctrl *Controller) handleItem(rsc Resource, item Item, matchedItem *MatchedItem) error { //nolint:cyclop
 	// filter resource by condition
 	matched, err := item.Rule.Run(rsc)
 	if err != nil {
@@ -183,6 +183,20 @@ func (ctrl *Controller) handleItem(rsc Resource, item Item, matchedItem *Matched
 	}
 	if item.TFBasename != nil {
 		matchedItem.TFBasename = item.TFBasename
+	}
+
+	if item.Stop {
+		matchedItem.Stop = true
+		return nil
+	}
+
+	for _, child := range item.Children {
+		if err := ctrl.handleItem(rsc, child, matchedItem); err != nil {
+			return err
+		}
+		if matchedItem.Stop || matchedItem.Exclude {
+			return nil
+		}
 	}
 	return nil
 }
