@@ -45,14 +45,14 @@ items:
   exclude: true
 - rule: |
     Values.name contains "foo"
-  state_out: foo/terraform.tfstate
+  state_dirname: foo
   resource_name: "{{.Values.name}}"
-  tf_path: foo/resource.tf
+  tf_basename: resource.tf
 - rule: |
     Values.name contains "bar"
-  state_out: bar/terraform.tfstate
+  state_dirname: bar
   resource_name: "{{.Values.name}}"
-  tf_path: bar/resource.tf
+  tf_basename: resource.tf
 ```
 
 ## Restriction
