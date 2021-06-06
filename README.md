@@ -7,6 +7,11 @@
 
 CLI tool to migrate Terraform configuration and State
 
+## Check tfmigrator/tfmigrator
+
+https://github.com/tfmigrator/tfmigrator is a Go framework for migration.
+Please see https://github.com/tfmigrator/tfmigrator#compared-with-suzuki-shunsuketfmigrator .
+
 ## Blog written in Japanese
 
 [terraformer で雑に生成した tf ファイル と state を分割したくてツールを書いた](https://techblog.szksh.cloud/tfmigrator/)
