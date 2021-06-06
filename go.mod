@@ -1,4 +1,4 @@
-module github.com/suzuki-shunsuke/tfmigrator-cli
+module github.com/suzuki-shunsuke/tfmigrator
 
 go 1.15
 

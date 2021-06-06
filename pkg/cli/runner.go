@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/constant"
+	"github.com/suzuki-shunsuke/tfmigrator/pkg/constant"
 	"github.com/urfave/cli/v2"
 )
 
