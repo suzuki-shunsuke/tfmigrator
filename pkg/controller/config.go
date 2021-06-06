@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/expr"
+	"github.com/suzuki-shunsuke/tfmigrator/pkg/expr"
 	"gopkg.in/yaml.v2"
 )
 

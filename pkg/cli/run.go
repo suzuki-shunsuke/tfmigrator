@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/controller"
+	"github.com/suzuki-shunsuke/tfmigrator/pkg/controller"
 	"github.com/urfave/cli/v2"
 )
 
