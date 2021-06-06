@@ -3,7 +3,7 @@ package expr_test
 import (
 	"testing"
 
-	"github.com/suzuki-shunsuke/tfmigrator/pkg/expr"
+	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/expr"
 	"gopkg.in/yaml.v2"
 )
 

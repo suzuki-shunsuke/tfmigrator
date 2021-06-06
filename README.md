@@ -1,11 +1,17 @@
-# tfmigrator
+# tfmigrator-cli
 
-[![Build Status](https://github.com/suzuki-shunsuke/tfmigrator/workflows/test/badge.svg)](https://github.com/suzuki-shunsuke/tfmigrator/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/suzuki-shunsuke/tfmigrator)](https://goreportcard.com/report/github.com/suzuki-shunsuke/tfmigrator)
-[![GitHub last commit](https://img.shields.io/github/last-commit/suzuki-shunsuke/tfmigrator.svg)](https://github.com/suzuki-shunsuke/tfmigrator)
-[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/suzuki-shunsuke/tfmigrator/main/LICENSE)
+[![Build Status](https://github.com/suzuki-shunsuke/tfmigrator-cli/workflows/test/badge.svg)](https://github.com/suzuki-shunsuke/tfmigrator-cli/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/suzuki-shunsuke/tfmigrator-cli)](https://goreportcard.com/report/github.com/suzuki-shunsuke/tfmigrator-cli)
+[![GitHub last commit](https://img.shields.io/github/last-commit/suzuki-shunsuke/tfmigrator-cli.svg)](https://github.com/suzuki-shunsuke/tfmigrator-cli)
+[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/suzuki-shunsuke/tfmigrator-cli/main/LICENSE)
 
 CLI tool to migrate Terraform configuration and State
+
+## Note: this CLI was renamed from tfmigrator to tfmigrator-cli
+
+This repository was renamed from tfmigrator to tfmigrator-cli, because we started to develop tfmigrator as Go package (framework).
+
+https://github.com/suzuki-shunsuke/tfmigrator-cli/issues/25
 
 ## Blog written in Japanese
 
@@ -23,7 +29,7 @@ CLI tool to migrate Terraform configuration and State
 
 ## Install
 
-Download a binary from the [replease page](https://github.com/suzuki-shunsuke/tfmigrator/releases).
+Download a binary from the [replease page](https://github.com/suzuki-shunsuke/tfmigrator-cli/releases).
 
 ## How to use
 
