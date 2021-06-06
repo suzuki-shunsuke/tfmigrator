@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/tfmigrator/pkg/cli"
-	"github.com/suzuki-shunsuke/tfmigrator/pkg/signal"
+	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/cli"
+	"github.com/suzuki-shunsuke/tfmigrator-cli/pkg/signal"
 )
 
 func main() {
