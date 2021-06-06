@@ -5,7 +5,7 @@
 set -eu
 set -o pipefail
 
-REMOTE=https://github.com/suzuki-shunsuke/tfmigrator-cli
+REMOTE=https://github.com/suzuki-shunsuke/tfmigrator
 
 ee() {
   echo "+ $*"
