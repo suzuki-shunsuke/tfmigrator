@@ -28,7 +28,7 @@ Please see https://github.com/tfmigrator/tfmigrator#compared-with-suzuki-shunsuk
 
 ## Install
 
-Download a binary from the [replease page](https://github.com/suzuki-shunsuke/tfmigrator/releases).
+Download a binary from the [release page](https://github.com/suzuki-shunsuke/tfmigrator/releases).
 
 ## How to use
 
