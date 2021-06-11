@@ -14,6 +14,10 @@ type ResourceName struct {
 	raw  string
 }
 
+func (resourceName *ResourceName) Empty() bool {
+	return resourceName == nil || resourceName.tmpl == nil
+}
+
 func (resourceName *ResourceName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var a string
 	if err := unmarshal(&a); err != nil {

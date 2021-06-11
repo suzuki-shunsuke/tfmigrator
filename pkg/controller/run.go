@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
@@ -41,7 +42,7 @@ func (ctrl *Controller) Run(ctx context.Context, param Param) error { //nolint:c
 
 	for _, rsc := range state.Values.RootModule.Resources {
 		if err := ctrl.handleResource(ctx, param, rsc, tfPath, &dryRunResult); err != nil {
-			return err
+			return fmt.Errorf("handle a resource %s: %w", rsc.Address, err)
 		}
 	}
 	if param.DryRun {
@@ -88,102 +89,117 @@ func (ctrl *Controller) writeTF() (string, error) {
 	return f.Name(), nil
 }
 
-type ResourcePath struct {
-	Type string
-	Name string
-}
-
-func (rp *ResourcePath) Path() string {
-	return rp.Type + "." + rp.Name
-}
-
-func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Resource, hclFilePath string, dryRunResult *DryRunResult) error {
-	matched := false
+func (ctrl *Controller) handleResource(ctx context.Context, param Param, rsc Resource, hclFilePath string, dryRunResult *DryRunResult) error { //nolint:funlen,cyclop
+	matchedItem := MatchedItem{}
 	for _, item := range param.Items {
-		f, err := ctrl.handleItem(ctx, rsc, item, hclFilePath, param, dryRunResult)
-		if err != nil {
+		if err := ctrl.handleItem(rsc, item, &matchedItem); err != nil {
 			return fmt.Errorf("handle item (rule: %s): %w", item.Rule.Raw(), err)
 		}
-		if f {
-			matched = true
+		if matchedItem.Exclude || matchedItem.Stop {
 			break
-		}
-	}
-	if !matched && param.DryRun {
-		resourcePath, err := getResourcePath(rsc)
-		if err != nil {
-			return err
-		}
-		dryRunResult.NoMatchResources = append(dryRunResult.NoMatchResources, resourcePath.Path())
-	}
-	return nil
-}
-
-func (ctrl *Controller) handleItem(ctx context.Context, rsc Resource, item Item, hclFilePath string, param Param, dryRunResult *DryRunResult) (bool, error) { //nolint:cyclop,funlen
-	resourcePath, err := getResourcePath(rsc)
-	if err != nil {
-		return true, err
-	}
-	// filter resource by condition
-	matched, err := item.Rule.Run(rsc)
-	if err != nil {
-		return false, fmt.Errorf("check if the rule matches with the resource: %w", err)
-	}
-	if !matched {
-		return false, nil
-	}
-
-	if item.Exclude {
-		if param.DryRun {
-			dryRunResult.ExcludedResources = append(dryRunResult.ExcludedResources, resourcePath.Path())
-		}
-		return true, nil
-	}
-
-	newResourcePath := resourcePath
-	if item.ResourceName != nil {
-		// compute new resource path
-		newResourcePath.Name, err = item.ResourceName.Parse(rsc)
-		if err != nil {
-			return true, fmt.Errorf("compute a new resource name (template: %s): %w", item.ResourceName.Raw(), err)
 		}
 	}
 
 	if param.DryRun {
-		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, MigratedResource{
-			SourceResourcePath: resourcePath.Path(),
-			DestResourcePath:   newResourcePath.Path(),
-			TFPath:             item.TFPath,
-			StateOut:           item.StateOut,
-		})
-		return true, nil
+		if matchedItem.Exclude {
+			dryRunResult.ExcludedResources = append(dryRunResult.ExcludedResources, rsc.Address)
+			return nil
+		}
+		if !matchedItem.Match() {
+			dryRunResult.NoMatchResources = append(dryRunResult.NoMatchResources, rsc.Address)
+			return nil
+		}
+		migratedResource, err := matchedItem.Parse(rsc)
+		if err != nil {
+			return err
+		}
+		dryRunResult.MigratedResources = append(dryRunResult.MigratedResources, *migratedResource)
+		return nil
 	}
 
-	hclFile, err := os.Open(hclFilePath)
-	if err != nil {
-		return true, fmt.Errorf("open a Terraform configuration %s: %w", hclFilePath, err)
+	if matchedItem.Exclude {
+		return nil
 	}
-	defer hclFile.Close()
 
-	tfFile, err := os.OpenFile(item.TFPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if !matchedItem.Match() {
+		return nil
+	}
+	migratedResource, err := matchedItem.Parse(rsc)
 	if err != nil {
-		return true, fmt.Errorf("open a file which will write Terraform configuration %s: %w", item.TFPath, err)
+		return err
+	}
+
+	tfPath := filepath.Join(migratedResource.StateDirname, migratedResource.TFBasename)
+	tfFile, err := os.OpenFile(tfPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("open a file which will write Terraform configuration %s: %w", tfPath, err)
 	}
 	defer tfFile.Close()
 
+	hclFile, err := os.Open(hclFilePath)
+	if err != nil {
+		return fmt.Errorf("open a Terraform configuration %s: %w", hclFilePath, err)
+	}
+	defer hclFile.Close()
+
 	buf := bytes.Buffer{}
-	if err := ctrl.getHCL(ctx, resourcePath.Path(), newResourcePath.Path(), hclFile, &buf); err != nil {
-		return true, err
+	if err := ctrl.getHCL(ctx, rsc.Address, migratedResource.DestResourcePath, hclFile, &buf); err != nil {
+		return err
 	}
 
-	if err := ctrl.stateMv(ctx, item.StateOut, resourcePath.Path(), newResourcePath.Path(), param.SkipState); err != nil {
-		return true, err
+	if err := ctrl.stateMv(ctx, filepath.Join(migratedResource.StateDirname, migratedResource.StateBasename), rsc.Address, migratedResource.DestResourcePath, param.SkipState); err != nil {
+		return err
 	}
 	// write hcl
 	if _, err := io.Copy(tfFile, &buf); err != nil {
-		return true, fmt.Errorf("write Terraform configuration to a file %s: %w", item.TFPath, err)
+		return fmt.Errorf("write Terraform configuration to a file %s: %w", tfPath, err)
 	}
-	return true, nil
+
+	return nil
+}
+
+func (ctrl *Controller) handleItem(rsc Resource, item Item, matchedItem *MatchedItem) error { //nolint:cyclop
+	// filter resource by condition
+	matched, err := item.Rule.Run(rsc)
+	if err != nil {
+		return fmt.Errorf("check if the rule matches with the resource: %w", err)
+	}
+	if !matched {
+		return nil
+	}
+
+	if item.Exclude {
+		matchedItem.Exclude = true
+		return nil
+	}
+
+	if item.ResourceName != nil {
+		matchedItem.ResourceName = item.ResourceName
+	}
+	if item.StateBasename != nil {
+		matchedItem.StateBasename = item.StateBasename
+	}
+	if item.StateDirname != nil {
+		matchedItem.StateDirname = item.StateDirname
+	}
+	if item.TFBasename != nil {
+		matchedItem.TFBasename = item.TFBasename
+	}
+
+	if item.Stop {
+		matchedItem.Stop = true
+		return nil
+	}
+
+	for _, child := range item.Children {
+		if err := ctrl.handleItem(rsc, child, matchedItem); err != nil {
+			return err
+		}
+		if matchedItem.Stop || matchedItem.Exclude {
+			return nil
+		}
+	}
+	return nil
 }
 
 func (ctrl *Controller) getHCL(
@@ -200,11 +216,4 @@ func (ctrl *Controller) getHCL(
 		return fmt.Errorf("rename resource: %w", err)
 	}
 	return nil
-}
-
-func getResourcePath(rsc Resource) (ResourcePath, error) { //nolint:unparam
-	return ResourcePath{
-		Type: rsc.Type,
-		Name: rsc.Name,
-	}, nil
 }
