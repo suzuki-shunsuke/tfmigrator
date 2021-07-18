@@ -5,12 +5,12 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/suzuki-shunsuke/tfmigrator.svg)](https://github.com/suzuki-shunsuke/tfmigrator)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/suzuki-shunsuke/tfmigrator/main/LICENSE)
 
-CLI tool to migrate Terraform configuration and State
+CLI to migrate Terraform configuration and State
 
-## Check tfmigrator/tfmigrator
+## Check tfmigrator/tfmigrator and tfmigrator/cli
 
 https://github.com/tfmigrator/tfmigrator is a Go framework for migration.
-Please see https://github.com/tfmigrator/tfmigrator#compared-with-suzuki-shunsuketfmigrator .
+And https://github.com/tfmigrator/cli is a CLI to migrate Terraform configuration and State.
 
 ## Blog written in Japanese
 
