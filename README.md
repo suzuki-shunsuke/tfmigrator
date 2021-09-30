@@ -7,10 +7,10 @@
 
 CLI to migrate Terraform configuration and State
 
-## Check tfmigrator/tfmigrator and tfmigrator/cli
+## :warning: Deprecated: Use tfmigrator/tfmigrator and tfmigrator/cli instead of this
 
-https://github.com/tfmigrator/tfmigrator is a Go framework for migration.
-And https://github.com/tfmigrator/cli is a CLI to migrate Terraform configuration and State.
+* [tfmigrator/tfmigrator](https://github.com/tfmigrator/tfmigrator): Go framework to migrate Terraform configuration and State
+* [tfmigrator/cli](https://github.com/tfmigrator/cli): CLI to migrate Terraform configuration and State
 
 ## Blog written in Japanese
 
