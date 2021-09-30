@@ -9,10 +9,13 @@ path | type | required | default | description
 path | type | required | default | example | description
 --- | --- | --- | --- | --- | ---
 rule | bool expression | true | | `Type == "null_resource"` | If the result is `true`, the resource is proceeded by the item
-state_out | string | true | | `foo/terraform.tfstate` |
-tf_path | string | true | | `foo/resource.tf` |
+state_dirname | string | true | | `foo` |
+state_basename | string | false | `terraform.tfstate` | |
+tf_basename | string | true | | `main.tf` |
 resource_name | template | false | | `{{.Values.tags.Name}}` | If this isn't empty, the resource is renamed to this value
 exclude | bool | false | false | | If this is true, resources which match the item are ignored 
+stop | bool | false | false | |
+children | []item | false | [] | |
 
 ## type: bool expression
 
